@@ -73,9 +73,7 @@ class RequesOncall:
     def add_user_to_team(self, team, user):
         add_user_team_url = self.PATH_ONCALL + f'/api/v0/teams/{team}/users'
         try:
-            add_user_team = requests.put(add_user_team_url, data=user, headers=self.headers, cookies=self.cookies)
-            print(add_user_team.status_code)
-            print(add_user_team.content)
+            add_user_team = requests.post(add_user_team_url, data=user, headers=self.headers, cookies=self.cookies)
             if add_user_team.status_code == 201:
                 print("User added to team Success")
             else:

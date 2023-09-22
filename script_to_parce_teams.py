@@ -21,14 +21,14 @@ for team in data['teams']:
         session_oncall.add_user_to_team(team['name'], user_parse_json(user))
 
         # Iterate through the duty schedule for the user
-        # for duty_entry in user['duty']:
-        #     start, end = convertion_start_end(str(duty_entry['date']))
-        #     duty_data = {
-        #         "start": start,
-        #         "end": end,
-        #         "user": user['name'],
-        #         "team": team['name'],
-        #         "role": duty_entry['role']
-        #     }
-        #     duty_json = json.dumps(duty_data)
-        #     session_oncall.create_event(duty_json)
+        for duty_entry in user['duty']:
+            start, end = convertion_start_end(str(duty_entry['date']))
+            duty_data = {
+                "start": start,
+                "end": end,
+                "user": user['name'],
+                "team": team['name'],
+                "role": duty_entry['role']
+            }
+            duty_json = json.dumps(duty_data)
+            session_oncall.create_event(duty_json)
