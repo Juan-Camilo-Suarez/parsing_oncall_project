@@ -1,0 +1,16 @@
+teams:
+  - name: "SREALO"
+    scheduling_timezone: "Europe/Moscow"
+    email: "Cafghdhfmilo@sre-course.ru"
+    slack_channel: "#k8sss-team"
+    users:
+      - name: "ZORRAR.ivanov"
+        full_name: "ZORRAR Ivanov"
+        phone_number: "+1 111-111-1111"
+        email: "Z.ivanov@sre-course.ru"
+        duty:
+          - date: "02/10/2023"
+            role: "primary"
+          - date: "03/10/2023"
+            role: "secondary"
+
