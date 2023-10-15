@@ -43,3 +43,14 @@ def convertion_start_end(fecha_str):
         return int(marca_tiempo_unix), int(marca_tiempo_unix_aumentado)
     except ValueError:
         return None, None
+
+
+class Response:
+    def __init__(self, Data, URLPath, ResponseTime, StatusCode):
+        self.Data = Data
+        self.URLPath = URLPath
+        self.ResponseTime = ResponseTime
+        self.StatusCode = StatusCode
+
+    def __str__(self):
+        return f"Data: {self.Data}, URLPath: {self.URLPath}, ResponseTime: {self.ResponseTime}, StatusCode: {self.StatusCode}"
