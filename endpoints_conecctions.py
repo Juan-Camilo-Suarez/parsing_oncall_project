@@ -1,8 +1,7 @@
 import json
-
 import requests
 
-from parce_functions import user_update_parse_json
+from parce_functions import user_update_parse_json, Response
 
 
 class RequesOncall:
@@ -62,7 +61,7 @@ class RequesOncall:
         users_url = self.PATH_ONCALL + f"/api/v0/users/{user['name']}"
         try:
             update_user = requests.put(users_url, data=user_update_parse_json(user), headers=self.headers,
-                                        cookies=self.cookies)
+                                       cookies=self.cookies)
             if update_user.status_code == 204:
                 print("User Update Success")
             else:
@@ -93,3 +92,32 @@ class RequesOncall:
                 print("no event found")
         except Exception as e:
             print("An error occurred during create event:", str(e))
+
+    def get_teams(self):
+        teams_url = self.PATH_ONCALL + "/api/v0/teams"
+        try:
+            response = requests.get(teams_url, headers=self.headers, cookies=self.cookies)
+            if response.status_code == 200:
+                teams = response.json()
+                print("Teams:")
+                for team in teams:
+                    print(team)
+            else:
+                print("No teams found")
+        except Exception as e:
+            print("An error occurred while getting teams:", str(e))
+
+    def get_summary(self, team):
+        endpoint = f"{self.PATH_ONCALL}/api/v0/teams/{team}/summary"
+        try:
+            response = requests.get(endpoint, headers=self.headers, cookies=self.cookies)
+            if response.status_code == 200:
+                response_data = response.json()
+                current_summary = response_data.get("current", {})
+                result = Response(current_summary, response.url, response.elapsed.total_seconds(), response.status_code)
+                print(result)
+                return result
+            else:
+                print("Error fetching summary")
+        except Exception as e:
+            print("An error occurred while getting summary:", str(e))
