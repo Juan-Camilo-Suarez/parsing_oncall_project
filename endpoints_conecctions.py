@@ -1,7 +1,34 @@
 import json
 import requests
+from prometheus_client import Gauge, Counter, Histogram
 
 from parce_functions import user_update_parse_json, Response
+
+roles = ["primary", "manager"]
+
+available_team_members_gauge = Gauge(
+    "oncall_avail_users",
+    "The number of current available team members that are in rotation and can be contacted for work",
+    labelnames=["role", "team"],
+)
+
+errors_counter = Counter(
+    "oncall_http_errors_total", "Amount of http errors encountered while contacting oncall web service",
+    labelnames=["path"]
+)
+
+request_duration_hist = Histogram(
+    "oncall_http_request_duration_seconds",
+    "HTTP request duration in seconds made to the oncall server to gather metrics.",
+    labelnames=["path"],
+)
+
+status_code_hist = Histogram(
+    "oncall_http_status_code",
+    "http status codes when getting available team members in oncall",
+    labelnames=["path"],
+    buckets=(299, 399, 499, 599),
+)
 
 
 class RequesOncall:
@@ -101,6 +128,9 @@ class RequesOncall:
                 teams = response.json()
                 print("Teams:")
                 for team in teams:
+                    response = self.get_summary(team)
+                    # available_team_members_gauge.labels(response)
+
                     print(team)
             else:
                 print("No teams found")
@@ -111,13 +141,21 @@ class RequesOncall:
         endpoint = f"{self.PATH_ONCALL}/api/v0/teams/{team}/summary"
         try:
             response = requests.get(endpoint, headers=self.headers, cookies=self.cookies)
+            request_duration_hist.labels(team).observe(response.elapsed.total_seconds())
+            status_code_hist.labels(team).observe(response.status_code)
             if response.status_code == 200:
                 response_data = response.json()
                 current_summary = response_data.get("current", {})
-                result = Response(current_summary, response.url, response.elapsed.total_seconds(), response.status_code)
-                print(result)
-                return result
+                for i in roles:
+                    if i in current_summary:
+                        available_team_members_gauge.labels({'role': i, 'team': team}).set(
+                            len(current_summary.get(i)))
+                    else:
+                        available_team_members_gauge.labels({'role': i, 'team': team}).set(0)
+                # result = Response(current_summary, response.url, response.elapsed.total_seconds(), response.status_code)
+                # return result
             else:
                 print("Error fetching summary")
         except Exception as e:
+            errors_counter.labels(team).inc()
             print("An error occurred while getting summary:", str(e))
